@@ -1,0 +1,69 @@
+version: '3.3'
+
+services:
+  mysql:
+    image: cjhuang/mysql
+    hostname: mysql
+    environment:
+      - TZ=${TZ}
+      - MYSQL_DATABASE=backend_test
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_PASSWORD=root
+    ports:
+      - target: 3306
+        published: 3306
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '5M'
+        max-file: '2'
+
+  redis:
+    image: cjhuang/redis
+    hostname: redis
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${REDIS_CONFIG_PATH}:/usr/local/etc/redis
+    ports:
+      - target: 6379
+        published: 6379
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '5M'
+        max-file: '2'
+
+  nginx:
+    image: cjhuang/nginx:development
+    hostname: nginx
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${NGINX_CONFIGD_PATH}:/etc/nginx/conf.d
+      - ${WWW_PATH}:/var/www/application-service
+    ports:
+      - target: 80
+        published: 80
+        mode: host
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '5M'
+        max-file: '2'
+
+  php-fpm:
+    image: cjhuang/php-fpm:development
+    hostname: php-fpm
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${PHP_CONFIG_PATH}:/usr/local/etc
+      - ${PHP_APPLICATION_PATH}:/var/www/application-service
+    ports:
+      - 9000
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '5M'
+        max-file: '2'
